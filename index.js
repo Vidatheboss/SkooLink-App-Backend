@@ -5,6 +5,7 @@ const userRoute = require('./routes/users')
 const studentRoute = require('./routes/student')
 const indexRoute = require('./routes')
 const newsRoute = require('./routes/news')
+const inboxRoute = require('./routes/inbox')
 
 const app = express()
 
@@ -17,5 +18,6 @@ app.use('/users', userRoute)
 app.use('/students', studentRoute)
 app.use('/news', newsRoute)
 app.use('/', indexRoute)
+app.use('/inbox',inboxRoute)
 
 module.exports = app
