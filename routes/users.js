@@ -39,7 +39,7 @@ router.post('/signup', (req, res) =>{
 
 router.post('/login', (req, res) =>{
     const user = req.body
-    query = "SELECT email, password, role, active FROM users WHERE email=?"
+    query = "SELECT id, email, password, role, active FROM users WHERE email=?"
     connection.query(query, [user.email], (err, results) =>{
         if(!err) {
             if(results.length <= 0 || results[0].password !== user.password) {
@@ -57,7 +57,8 @@ router.post('/login', (req, res) =>{
                 }
                 const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
                 res.status(200).json({
-                    token: accessToken
+                    token: accessToken,
+                    id: results[0].id
                 })
             } else {
         return res.status(400).json({
