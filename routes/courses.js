@@ -4,7 +4,7 @@ const router = express.Router()
 
 let query = ""
 
-router.get('/courses', (req, res) => {
+router.get('/', (req, res) => {
     query = "SELECT name FROM classes"
 
     connection.query(query, (err, results) =>{
