@@ -149,6 +149,58 @@ router.get('/checkToken', auth.authenticateToken, checkRole.checkRole, (req, res
     })
 })
 
+router.get('/getUsers', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
+    query = "SELECT u.id, u.username, u.email, r.name FROM users u INNER JOIN roles r ON u.role = r.id;"
+    connection.query(query, (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
+router.post('/create', (req, res) =>{
+    let user = req.body
+    query = "SELECT email, password, role, active FROM users WHERE email = ?"
+    connection.query(query, [user.email], (err, results) => {
+        if(!err){
+            if(results.length <= 0) {
+                query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, ?, true);"
+                connection.query(query, [user.username, user.password, user.email, user.role], (err, results) =>{
+                    if(!err) {
+                        return res.status(200).json({
+                            message: "Successfully Registered."
+                        })
+                    } else {
+                        return res.status(500).json(err)
+                    }
+                })
+            } else {
+                return res.status(400).json({
+                    message: "Email Already Exists."
+                })
+            }
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
+router.delete('/delete/:id', (req, res) => {
+    let id = req.params.id;
+    query = "DELETE FROM users WHERE id = ?"
+    connection.query(query, [id], (err, results) => {
+        if(!err) {
+            return res.status(200).json({
+                message: "Successfully Deleted."
+            })
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
 // router.post('/changePassword', auth.authenticateToken, (req, res) =>{
 //     const user = req.body
 //     const email = res.locals.email
