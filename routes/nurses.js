@@ -4,9 +4,10 @@ const router = express.Router()
 
 let query = ""
 
-router.get('/courses', (req, res) => {
-    query = "SELECT name FROM classes"
-
+router.get('/:nurse', (req, res) => {
+    let nurse = req.params.nurse
+    query = "SELECT id, name FROM nurses WHERE user_id = "+nurse
+    
     connection.query(query, (err, results) =>{
         if(!err) {
             return res.status(200).json(results)
