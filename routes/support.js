@@ -22,4 +22,23 @@ router.post('/', (req, res) => {
 
 
 })
+
+router.get('/tickets', (req, res) =>{
+    let tickets = req.params.student;
+
+    query = "SELECT tickets.creator_id, tickets.subject, tickets.description, tickets.date, users.email FROM skoolink.tickets " +
+            "INNER JOIN users ON tickets.creator_id=users.id;"
+    
+ 
+    
+    connection.query(query, (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
+
 module.exports = router
