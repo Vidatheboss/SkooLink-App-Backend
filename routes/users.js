@@ -160,6 +160,36 @@ router.get('/getUsers', auth.authenticateToken, checkRole.checkRole, (req, res) 
     })
 })
 
+router.get('/getOneUser/:id/:role', (req, res) =>{
+    let id = req.params.id;
+    let role = req.params.role;
+
+    switch (role) {
+        case "1":
+            query = "SELECT u.id, u.username, u.email, u.role, r.name, s.name as fullName FROM users u INNER JOIN roles r ON u.role = r.id INNER JOIN students s ON s.user_id = u.id WHERE u.id = ?;"
+            break;
+        case "2":
+            query = "SELECT u.id, u.username, u.email, u.role, r.name, t.name as fullName FROM users u INNER JOIN roles r ON u.role = r.id INNER JOIN teachers t ON t.user_id = u.id WHERE u.id = ?;"
+            break;
+        case "3":
+            query = "SELECT u.id, u.username, u.email, u.role, r.name, n.name as fullName FROM users u INNER JOIN roles r ON u.role = r.id INNER JOIN nurses n ON n.user_id = u.id WHERE u.id = ?;"
+            break;
+        case "4":
+            query = "SELECT u.id, u.username, u.email, u.role, r.name, p.name as fullName FROM users u INNER JOIN roles r ON u.role = r.id INNER JOIN parents p ON p.user_id = u.id WHERE u.id = ?;"
+            break;
+        case "5":
+            query = "SELECT u.id, u.username, u.email, u.role, r.name, a.name as fullName FROM users u INNER JOIN roles r ON u.role = r.id INNER JOIN admins a ON a.user_id = u.id WHERE u.id = ?;"
+            break;
+    }
+    connection.query(query, [id], (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
 router.post('/create', (req, res) =>{
     let user = req.body
     query = "SELECT email, password, role, active FROM users WHERE email = ?"
@@ -205,6 +235,46 @@ router.post('/create', (req, res) =>{
                     message: "Email Already Exists."
                 })
             }
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
+router.put('/edit/:id/:role', (req, res) => {
+    let user = req.body
+    let id = req.params.id;
+    let role = req.params.role;
+
+    query = "UPDATE users SET username = ?, password = ? WHERE id = ?"
+    connection.query(query, [user.username, user.password, id], (err) => {
+        if (!err) {
+            switch (role) {
+                case "1":
+                    query = "UPDATE students SET name = ? WHERE user_id = ?"
+                    break;
+                case "2":
+                    query = "UPDATE teachers SET name = ? WHERE user_id = ?"
+                    break;
+                case "3":
+                    query = "UPDATE nurses SET name = ? WHERE user_id = ?"
+                    break;
+                case "4":
+                    query = "UPDATE parents SET name = ? WHERE user_id = ?"
+                    break;
+                case "5":
+                    query = "UPDATE admins SET name = ? WHERE user_id = ?"
+                    break;
+            }
+            connection.query(query, [user.fullName, id], (err) => {
+                if(!err) {
+                    return res.status(200).json({
+                        message: "Record Successfully Updated."
+                    })
+                } else {
+                    return res.status(500).json(err)
+                }
+            })
         } else {
             return res.status(500).json(err)
         }
