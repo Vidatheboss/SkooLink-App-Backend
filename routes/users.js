@@ -124,6 +124,21 @@ router.get('/get', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
     })
 })
 
+router.get('/:id', (req, res) =>{
+
+    let id = req.params.id;
+
+    query = "SELECT id, username, email, active FROM users WHERE id=?"
+
+    connection.query(query, [id], (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
 // router.patch('/update', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
 //     let user = req.body
 //     query = "UPDATE user SET status=? WHERE id=?"
