@@ -8,6 +8,7 @@ const coursesRoute = require('./routes/courses')
 const newsRoute = require('./routes/news')
 const inboxRoute = require('./routes/inbox')
 const medInfoRoute = require('./routes/medical-info')
+const supportRoute = require('./routes/support')
 
 const app = express()
 
@@ -23,5 +24,6 @@ app.use('/news', newsRoute)
 app.use('/courses', coursesRoute)
 app.use('/inbox',inboxRoute)
 app.use('/medical-info',medInfoRoute)
+app.use('/support', supportRoute)
 
 module.exports = app
