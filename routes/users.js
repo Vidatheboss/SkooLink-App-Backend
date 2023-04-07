@@ -150,7 +150,7 @@ router.get('/checkToken', auth.authenticateToken, checkRole.checkRole, (req, res
 })
 
 router.get('/getUsers', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
-    query = "SELECT u.id, u.username, u.email, r.name FROM users u INNER JOIN roles r ON u.role = r.id;"
+    query = "SELECT u.id, u.username, u.email, u.role, r.name FROM users u INNER JOIN roles r ON u.role = r.id;"
     connection.query(query, (err, results) =>{
         if(!err) {
             return res.status(200).json(results)
@@ -169,8 +169,32 @@ router.post('/create', (req, res) =>{
                 query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, ?, true);"
                 connection.query(query, [user.username, user.password, user.email, user.role], (err, results) =>{
                     if(!err) {
-                        return res.status(200).json({
-                            message: "Successfully Registered."
+                        switch (user.role) {
+                            case "1":
+                                query = "INSERT INTO students (user_id, name) VALUES ((SELECT MAX(id) FROM users), ?);"
+                                break;
+                            case "2":
+                                query = "INSERT INTO teachers (user_id, name) VALUES ((SELECT MAX(id) FROM users), ?);"
+                                break;
+                            case "3":
+                                query = "INSERT INTO nurses (user_id, name) VALUES ((SELECT MAX(id) FROM users), ?);"
+                                break;
+                            case "4":
+                                query = "INSERT INTO parents (user_id, name) VALUES ((SELECT MAX(id) FROM users), ?);"
+                                break;
+                            case "5":
+                                query = "INSERT INTO admins (user_id, name) VALUES ((SELECT MAX(id) FROM users), ?);"
+                                break;
+                        }
+
+                        connection.query(query, [user.fullName], (err, result) =>{
+                            if (!err) {
+                                return res.status(200).json({
+                                    message: "User Successfully Registered."
+                                })
+                            } else {
+                                return res.status(500).json(err)
+                            }
                         })
                     } else {
                         return res.status(500).json(err)
@@ -187,13 +211,39 @@ router.post('/create', (req, res) =>{
     })
 })
 
-router.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id/:role', (req, res) => {
     let id = req.params.id;
-    query = "DELETE FROM users WHERE id = ?"
+    let role = req.params.role;
+
+    switch (role) {
+        case "1":
+            query = "DELETE FROM students WHERE user_id = ?"
+            break;
+        case "2":
+            query = "DELETE FROM teachers WHERE user_id = ?"
+            break;
+        case "3":
+            query = "DELETE FROM nurses WHERE user_id = ?"
+            break;
+        case "4":
+            query = "DELETE FROM parents WHERE user_id = ?"
+            break;
+        case "5":
+            query = "DELETE FROM admins WHERE user_id = ?"
+            break;
+    }
+
     connection.query(query, [id], (err, results) => {
         if(!err) {
-            return res.status(200).json({
-                message: "Successfully Deleted."
+            query = "DELETE FROM users WHERE id = ?"
+            connection.query(query, [id], (err, results) => {
+                if (!err) {
+                    return res.status(200).json({
+                        message: "Record Successfully Deleted."
+                    })
+                } else {
+                    return res.status(500).json(err)
+                }
             })
         } else {
             return res.status(500).json(err)
