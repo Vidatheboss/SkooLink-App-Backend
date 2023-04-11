@@ -10,32 +10,32 @@ let checkRole = require('../services/checkRole')
 
 let query = ""
 
-router.post('/signup', (req, res) =>{
-    let user = req.body
-    query = "SELECT email, password, role, active FROM users WHERE email=?"
-    connection.query(query, [user.email], (err, results) => {
-        if(!err){
-            if(results.length <= 0) {
-                query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, 'teacher', false);"
-                connection.query(query, [user.name, user.password, user.email], (err, results) =>{
-                    if(!err) {
-                        return res.status(200).json({
-                            message: "Successfully Registered."
-                        })
-                    } else {
-                        return res.status(500).json(err)
-                    }
-                })
-            } else {
-                return res.status(400).json({
-                    message: "Email Already Exists."
-                })
-            }
-        } else {
-            return res.status(500).json(err)
-        }
-    })
-})
+// router.post('/signup', (req, res) =>{
+//     let user = req.body
+//     query = "SELECT email, password, role, active FROM users WHERE email=?"
+//     connection.query(query, [user.email], (err, results) => {
+//         if(!err){
+//             if(results.length <= 0) {
+//                 query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, 'teacher', false);"
+//                 connection.query(query, [user.name, user.password, user.email], (err, results) =>{
+//                     if(!err) {
+//                         return res.status(200).json({
+//                             message: "Successfully Registered."
+//                         })
+//                     } else {
+//                         return res.status(500).json(err)
+//                     }
+//                 })
+//             } else {
+//                 return res.status(400).json({
+//                     message: "Email Already Exists."
+//                 })
+//             }
+//         } else {
+//             return res.status(500).json(err)
+//         }
+//     })
+// })
 
 router.post('/login', (req, res) =>{
     const user = req.body
@@ -72,13 +72,13 @@ router.post('/login', (req, res) =>{
     })
 })
 
-let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth:{
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-    }
-})
+// let transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth:{
+//         user: process.env.EMAIL,
+//         pass: process.env.PASSWORD
+//     }
+// })
 
 // router.post('/forgotPassword', (req, res) =>{
 //     const user = req.body
@@ -124,7 +124,7 @@ router.get('/get', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
     })
 })
 
-router.get('/:id', (req, res) =>{
+router.get('/getUser/:id', (req, res) =>{
 
     let id = req.params.id;
 
