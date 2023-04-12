@@ -101,4 +101,29 @@ router.post('/grades/edit/', (req, res) => {
     })
 })
 
+router.get('/', (req, res) =>{
+    query = "SELECT * FROM students"
+    connection.query(query, (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
+router.get('/:student', (req, res) =>{
+    let student = req.params.student;
+
+    query = "SELECT * FROM students WHERE id = '"+student+"' OR name LIKE '%"+student+"%'";
+    
+    connection.query(query, (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+})
+
 module.exports = router
