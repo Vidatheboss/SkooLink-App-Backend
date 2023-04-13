@@ -13,6 +13,18 @@ let query = ""
 router.get('/get/:category', (req, res) =>{
     let category = req.params.category;
   
+// Selection of all news
+   if (category == "all"){
+    query = "SELECT * FROM skoolink.news "
+    connection.query(query, (err, results) =>{
+        if(!err) {
+            return res.status(200).json(results);
+        } else {
+            return res.status(500).json(err);
+        }
+    });
+// Selection of a specific category of news
+   }else{
     query = "SELECT * FROM skoolink.news WHERE category='" + category + "'"
     connection.query(query, (err, results) =>{
         if(!err) {
@@ -21,6 +33,10 @@ router.get('/get/:category', (req, res) =>{
             return res.status(500).json(err);
         }
     });
+
+   }
+   
+   
 });
 
 

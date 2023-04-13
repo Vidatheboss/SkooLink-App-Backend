@@ -51,16 +51,59 @@ router.post('/login', (req, res) =>{
                     message: "Wait for Admin Approval"
                 })
             } else if(results[0].password === user.password) {
-                const response = {
-                    email: results[0].email,
-                    role: results[0].role
+                switch (results[0].role) {
+                    case "1":
+                        query = "SELECT name FROM students WHERE user_id = ?;"
+                        break;
+                    case "2":
+                        query = "SELECT name FROM teachers WHERE user_id = ?;"
+                        break;
+                    case "3":
+                        query = "SELECT name FROM nurses WHERE user_id = ?;"
+                        break;
+                    case "4":
+                        query = "SELECT name FROM parents WHERE user_id = ?;"
+                        break;
+                    case "5":
+                        query = "SELECT name FROM admins WHERE user_id = ?;"
+                        break;
                 }
-                const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
-                res.status(200).json({
-                    token: accessToken,
-                    id: results[0].id,
-                    role: results[0].role
+
+                let userEmail = results[0].email;
+                let userRole = results[0].role;
+                let userId = results[0].id;
+                connection.query(query, [userId], (err, results) => {
+                    if (!err) {
+                        const response = {
+                            email: userEmail,
+                            role: userRole
+                        }
+
+                        const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
+                        res.status(200).json({
+                            token: accessToken,
+                            id: userId,
+                            role: userRole,
+                            fullName: results[0].name
+                        })
+                    } else {
+                        return res.status(401).json({
+                            message: "Incorrect Username or Password"
+                        })
+                    }
                 })
+
+                // const response = {
+                //     email: results[0].email,
+                //     role: results[0].role,
+                //     fullName: userFullName
+                // }
+                // const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
+                // res.status(200).json({
+                //     token: accessToken,
+                //     id: results[0].id,
+                //     role: results[0].role
+                // })
             } else {
         return res.status(400).json({
             message: "Something went wrong. Please try again later"
