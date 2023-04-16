@@ -10,32 +10,32 @@ let checkRole = require('../services/checkRole')
 
 let query = ""
 
-router.post('/signup', (req, res) =>{
-    let user = req.body
-    query = "SELECT email, password, role, active FROM users WHERE email=?"
-    connection.query(query, [user.email], (err, results) => {
-        if(!err){
-            if(results.length <= 0) {
-                query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, 'teacher', false);"
-                connection.query(query, [user.name, user.password, user.email], (err, results) =>{
-                    if(!err) {
-                        return res.status(200).json({
-                            message: "Successfully Registered."
-                        })
-                    } else {
-                        return res.status(500).json(err)
-                    }
-                })
-            } else {
-                return res.status(400).json({
-                    message: "Email Already Exists."
-                })
-            }
-        } else {
-            return res.status(500).json(err)
-        }
-    })
-})
+// router.post('/signup', (req, res) =>{
+//     let user = req.body
+//     query = "SELECT email, password, role, active FROM users WHERE email=?"
+//     connection.query(query, [user.email], (err, results) => {
+//         if(!err){
+//             if(results.length <= 0) {
+//                 query = "INSERT INTO users (username, password, email, role, active) VALUES (?, ?, ?, 'teacher', false);"
+//                 connection.query(query, [user.name, user.password, user.email], (err, results) =>{
+//                     if(!err) {
+//                         return res.status(200).json({
+//                             message: "Successfully Registered."
+//                         })
+//                     } else {
+//                         return res.status(500).json(err)
+//                     }
+//                 })
+//             } else {
+//                 return res.status(400).json({
+//                     message: "Email Already Exists."
+//                 })
+//             }
+//         } else {
+//             return res.status(500).json(err)
+//         }
+//     })
+// })
 
 router.post('/login', (req, res) =>{
     const user = req.body
@@ -51,16 +51,59 @@ router.post('/login', (req, res) =>{
                     message: "Wait for Admin Approval"
                 })
             } else if(results[0].password === user.password) {
-                const response = {
-                    email: results[0].email,
-                    role: results[0].role
+                switch (results[0].role) {
+                    case "1":
+                        query = "SELECT name FROM students WHERE user_id = ?;"
+                        break;
+                    case "2":
+                        query = "SELECT name FROM teachers WHERE user_id = ?;"
+                        break;
+                    case "3":
+                        query = "SELECT name FROM nurses WHERE user_id = ?;"
+                        break;
+                    case "4":
+                        query = "SELECT name FROM parents WHERE user_id = ?;"
+                        break;
+                    case "5":
+                        query = "SELECT name FROM admins WHERE user_id = ?;"
+                        break;
                 }
-                const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
-                res.status(200).json({
-                    token: accessToken,
-                    id: results[0].id,
-                    role: results[0].role
+
+                let userEmail = results[0].email;
+                let userRole = results[0].role;
+                let userId = results[0].id;
+                connection.query(query, [userId], (err, results) => {
+                    if (!err) {
+                        const response = {
+                            email: userEmail,
+                            role: userRole
+                        }
+
+                        const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
+                        res.status(200).json({
+                            token: accessToken,
+                            id: userId,
+                            role: userRole,
+                            fullName: results[0].name
+                        })
+                    } else {
+                        return res.status(401).json({
+                            message: "Incorrect Username or Password"
+                        })
+                    }
                 })
+
+                // const response = {
+                //     email: results[0].email,
+                //     role: results[0].role,
+                //     fullName: userFullName
+                // }
+                // const accessToken = jwt.sign(response, process.env.ACCESS_TOKEN, {expiresIn: '8h'})
+                // res.status(200).json({
+                //     token: accessToken,
+                //     id: results[0].id,
+                //     role: results[0].role
+                // })
             } else {
         return res.status(400).json({
             message: "Something went wrong. Please try again later"
@@ -72,13 +115,13 @@ router.post('/login', (req, res) =>{
     })
 })
 
-let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth:{
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-    }
-})
+// let transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth:{
+//         user: process.env.EMAIL,
+//         pass: process.env.PASSWORD
+//     }
+// })
 
 // router.post('/forgotPassword', (req, res) =>{
 //     const user = req.body
@@ -124,7 +167,7 @@ router.get('/get', auth.authenticateToken, checkRole.checkRole, (req, res) =>{
     })
 })
 
-router.get('/:id', (req, res) =>{
+router.get('/getUser/:id', (req, res) =>{
 
     let id = req.params.id;
 
