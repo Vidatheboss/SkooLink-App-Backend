@@ -6,7 +6,7 @@ let query = ""
 
 router.get('/messages/:id', (req, res) => {
    let id = req.params.id
-  // console.log(id);
+
     query = "SELECT * FROM messages where recipient_id=" + id
 
     connection.query(query, (err, results) =>{
@@ -20,7 +20,6 @@ router.get('/messages/:id', (req, res) => {
 router.get('/inbox-filter/:id', (req, res) => {
     let id = req.params.id
 
-   // console.log(id);
      query = "SELECT * FROM messages where id=" + id
  
      connection.query(query, (err, results) =>{
